@@ -1,6 +1,22 @@
 # session-manager
 OpenClaw/agent skill for session health diagnosis: detect bloated, orphaned, or recovery-abandoned sessions and recommend summarize, restart, handoff, or archive actions.
 
+## Install
+
+If you're installing it directly from GitHub with the skills CLI, the simplest command is:
+
+```bash
+npx -y skills add https://github.com/RichardHojunJang/session-manager -g -y
+```
+
+If you want to be explicit about the skill name, use:
+
+```bash
+npx -y skills add https://github.com/RichardHojunJang/session-manager --skill session-manager -g -y
+```
+
+After install, the skill should be available under your global skills directory.
+
 ## What it does
 `session-manager` helps an agent decide whether a session is still healthy or whether it should be summarized, handed off, restarted, archived, or otherwise managed.
 
