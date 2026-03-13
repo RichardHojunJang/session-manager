@@ -1,37 +1,46 @@
 # session-manager
-Agent skill for session health diagnosis: detect bloated, orphaned, or recovery-abandoned sessions and recommend summarize, restart, handoff, or archive actions.
 
-## Install
+Agent skill for diagnosing session health and session-lifecycle risk.
 
-If you're installing it directly from GitHub with the skills CLI, the simplest command is:
+`session-manager` helps an agent decide whether a session should:
+- continue normally
+- be summarized and continued
+- prepare a handoff
+- move to a fresh session
+- become `reference-only`
+- be treated as the canonical session for a task
 
-```bash
-npx -y skills add https://github.com/RichardHojunJang/session-manager
-```
+## What it solves
 
-If you want to be explicit about the skill name, use:
+Long-running sessions often degrade in predictable ways:
+- verbosity grows
+- repetition appears
+- context cost becomes disproportionate
+- recovery attempts create multiple competing sessions
+- the source of truth becomes unclear
 
-```bash
-npx -y skills add https://github.com/RichardHojunJang/session-manager --skill session-manager
-```
+This skill turns those symptoms into a practical recommendation.
 
-After install, the skill should be available under your global skills directory.
+## Core operating model
 
-## What it does
-`session-manager` helps an agent decide whether a session is still healthy or whether it should be summarized, handed off, restarted, archived, or otherwise managed.
+The skill now includes explicit percent-based session rules:
 
-It focuses on practical session-health problems such as:
-- bloated sessions
-- orphaned sessions
-- abandoned recovery attempts
-- growing verbosity
-- repeated answers
-- external provider errors vs session-structure problems
+- **0–69%**: normal operation
+- **70–84%**: inspect / likely `early_warning`
+- **85–89%**: prepare handoff / canonical summary
+- **90–94%**: prefer fresh-session transition
+- **95%+**: avoid extending unless absolutely necessary
+
+It also enforces:
+- **one canonical session per task**
+- non-canonical sessions become **secondary** or **reference-only**
+- fresh sessions should load **minimal restore context**, not the full transcript
 
 ## Key states
 
 - `healthy`
 - `early_warning`
+- `handoff_ready`
 - `bloated`
 - `orphaned`
 - `recovery_abandoned`
@@ -40,33 +49,61 @@ It focuses on practical session-health problems such as:
 
 ## Recommended actions
 
-Depending on the diagnosis, the skill recommends actions such as:
+Depending on diagnosis, the skill recommends actions such as:
 - `continue`
 - `summarize_and_continue`
+- `prepare_handoff`
 - `summarize_and_restart`
-- `mark_orphan`
-- `reassign_owner`
 - `choose_canonical_session`
+- `mark_reference_only`
+- `archive_reference`
+- `retry_after_external_error`
+
+## Output shape
+
+Typical output includes:
+- target session
+- status
+- context-usage band
+- confidence
+- observed signals
+- recommended action
+- next step
+
+When needed, it also emits a handoff block containing:
+- canonical session
+- secondary/reference sessions
+- owner
+- stage
+- done / remaining
+- blocker
+- next action
 
 ## Example prompts
 
-- "Can you run a health check on the sessions?"
-- "Are any of these sessions getting too bloated?"
-- "Look for any 'ghost' or orphaned sessions."
-- "Are there any sessions stuck mid-recovery?"
-- "Why are the answers getting longer and longer?"
-- "It's stuck in a loop. Is something wrong with the session?"
-- "Should I move this over to a fresh session?"
-- "Can you tell if this server_error is coming from the session or something else?"
-- "Give me some guidelines on how to handle sessions that eat up too many tokens."
+- "Run a health check on this session."
+- "Should I move this to a fresh session?"
+- "Which session is canonical now?"
+- "Mark the old one as reference-only."
+- "Is this bloated or just a temporary provider error?"
 - “세션 상태 점검해줘”
-- “너무 길어진 세션 있나?”
-- “고아 세션 찾아줘”
-- “복구하다 만 세션 있는지 봐줘”
 - “이 작업 새 세션으로 넘기는 게 좋을까?”
-- “같은 답변 반복하는데 세션 문제야?”
-- “server_error가 세션 문제인지 외부 문제인지 구분해줘”
-- “Check whether this session is getting bloated and tell me if I should summarize, restart, or hand it off.”
+- “정본 세션이 어디야?”
+- “이전 세션은 참고용으로만 둬야 하나?”
 
-## Notes
-This skill is designed as a session-health and lifecycle management skill, not just a session-listing utility.
+## Install
+
+```bash
+npx -y skills add https://github.com/RichardHojunJang/session-manager
+```
+
+Or explicitly:
+
+```bash
+npx -y skills add https://github.com/RichardHojunJang/session-manager --skill session-manager
+```
+
+## Files
+
+- `SKILL.md` — main diagnosis and session-lifecycle rules
+- `README.md` — overview and install instructions
