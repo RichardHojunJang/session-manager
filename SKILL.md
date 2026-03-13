@@ -40,6 +40,8 @@ Check the relevant session(s) and gather signals.
 Look for:
 - owner
 - current task
+- current stage (`plan`, `exec`, `verify`, or `fix`) when it can be inferred
+- current status (`idle`, `running`, `waiting`, `blocked`, or `done`) when it can be inferred
 - recent activity
 - next step clarity
 - message volume
@@ -99,12 +101,14 @@ Treat these as efficiency warnings:
 - repeated context drag reduces cost/performance efficiency
 
 ### C. Activity signals
-Treat these as lifecycle/ownership signals:
+Treat these as lifecycle/ownership and visibility signals:
 - session still exists but has little real work happening
 - no recent meaningful update
 - owner is unclear
 - next action is unclear
 - completion/interruption was never reported
+- current stage is unclear when it should be knowable (`plan`, `exec`, `verify`, `fix`)
+- current working status is unclear when it should be knowable (`idle`, `running`, `waiting`, `blocked`, `done`)
 
 ### D. Recovery signals
 Treat these as “repair flow got messy” signals:
@@ -291,6 +295,8 @@ Session Health Report
 - Target:
 - Status:
 - Confidence:
+- Stage:
+- Work status:
 
 Signals
 - ...
@@ -314,6 +320,8 @@ Session Handoff
 - Canonical session:
 - Secondary sessions:
 - Owner:
+- Stage:
+- Work status:
 - What is done:
 - Blocker:
 - Recommended next action:
@@ -322,6 +330,8 @@ Session Handoff
 When recovery, branching, or multi-session ambiguity exists, explicitly name:
 - the **canonical session** that should be treated as the source of truth
 - any **secondary/reference sessions** that should be kept only for context
+- the current **stage** (`plan`, `exec`, `verify`, `fix`) when inferable
+- the current **work status** (`idle`, `running`, `waiting`, `blocked`, `done`) when inferable
 - the **next action** required to move work forward
 - the main **blocker** if progress is currently stalled
 
@@ -350,6 +360,8 @@ Use this skill with a conservative operating posture.
 - Do **not** run a full session-health check before every normal message.
 - When a session starts to feel off, prefer `early_warning` over `bloated` unless there is clear evidence of severe degradation.
 - Treat repeated or near-identical answers as a strong signal that session fatigue, context drag, or recovery-loop behavior may be present.
+- Prefer exposing a small amount of state visibility (`stage`, `work status`, `next action`, `blocker`) over forcing another agent or future session to reconstruct progress from scratch.
+- When long-running work exists, try to distinguish whether the session is planning, executing, verifying, or fixing rather than treating all active work as one undifferentiated state.
 - Classify provider/server/tool failures as `external_error` first, then upgrade to a compound assessment only when repetition, verbosity growth, slowdown, or recovery confusion also appears.
 - Prefer summarize/continue or summarize/restart over destructive cleanup.
 - Consider periodic checks only after enough real-world usage establishes what counts as a useful signal vs a false positive.
@@ -381,12 +393,13 @@ Use this skill with a conservative operating posture.
 When a session is split, resumed, handed off, or partially recovered, do not only label the health state.
 Also produce a minimal recovery structure that another agent or later session can immediately use.
 
-Always prefer these five elements when relevant:
+Always prefer these seven elements when relevant:
 - **Canonical session** — identify the one session that is the current source of truth
 - **Secondary/reference sessions** — list any sessions that still matter for context but should not drive new work
+- **Stage** — say whether the work is currently in `plan`, `exec`, `verify`, or `fix`
+- **Work status** — say whether it is `idle`, `running`, `waiting`, `blocked`, or `done`
 - **Next action** — state the single most useful next step in concrete terms
 - **Blocker** — state what is currently preventing progress, if anything
-
 - **Handoff/resume block** — provide a compact structured handoff when another agent, another session, or a future restart may need to continue
 
 Do not force this structure into every healthy session report.
