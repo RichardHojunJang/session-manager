@@ -231,6 +231,18 @@ Use when:
 
 Recommended action:
 - `archive_reference`
+- or explicitly mark it `reference-only` when that wording helps the operator
+
+### `reference_only`
+Use when:
+- a session still contains useful history
+- but it should no longer drive active execution
+- a newer or healthier session should carry the work forward
+- keeping the old session available for summaries, handoffs, or resume flows is still useful
+
+Recommended action:
+- `archive_reference`
+- or `summarize_and_restart` with the old session retained as `reference-only`
 
 ### `external_error`
 Use when:
@@ -275,6 +287,7 @@ Map states to actions like this by default:
 - `orphaned` → `mark_orphan` or `reassign_owner`
 - `recovery_abandoned` → `choose_canonical_session`
 - `stale_reference` → `archive_reference`
+- `reference_only` → `archive_reference` or keep as supporting context while a newer session becomes canonical
 - `external_error` → `retry_after_external_error`
 
 If the user asks what to do next, answer directly.
@@ -399,6 +412,17 @@ Escalate faster when both are true:
 - recent outputs are materially repetitive or add little new progress
 
 In that case, do not keep recommending indefinite continuation. Prefer a concrete restart/handoff recommendation.
+
+### Reference-only preservation rule
+A session may remain valuable without remaining active.
+
+When a session is no longer fit for active work but still contains useful history:
+- mark it `reference-only`
+- stop using it as the active working session
+- keep it available for summaries, handoffs, and resume flows
+- move active work into the newer canonical session
+
+Do not treat `reference-only` as deletion. It is a lifecycle state meaning: keep, but do not drive with it.
 
 ## Example user requests
 
