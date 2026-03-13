@@ -6,13 +6,13 @@ Agent skill for session health diagnosis: detect bloated, orphaned, or recovery-
 If you're installing it directly from GitHub with the skills CLI, the simplest command is:
 
 ```bash
-npx -y skills add https://github.com/RichardHojunJang/session-manager -g -y
+npx -y skills add https://github.com/RichardHojunJang/session-manager
 ```
 
 If you want to be explicit about the skill name, use:
 
 ```bash
-npx -y skills add https://github.com/RichardHojunJang/session-manager --skill session-manager -g -y
+npx -y skills add https://github.com/RichardHojunJang/session-manager --skill session-manager
 ```
 
 After install, the skill should be available under your global skills directory.
