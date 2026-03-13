@@ -93,6 +93,16 @@ Treat these as “session is getting heavy” signals:
 - growing reliance on long prior context
 - larger and larger replies over time
 - repeated re-explanation of background
+- token/context utilization crossing practical warning thresholds
+
+#### Token threshold heuristics
+Apply these heuristics to any session type unless a channel-specific rule overrides them:
+- **<70% context used** → usually healthy on size alone
+- **70-85%** → size `early_warning` candidate; inspect for repetition, verbosity growth, or slowing progress
+- **85-92%** → strong `early_warning`; default toward `summarize_and_continue` unless the task is nearly done
+- **>92%** → `bloated` candidate by default; if user-visible repetition or degraded responsiveness is also present, prefer `summarize_and_restart`
+
+Do not use thresholds mechanically. Combine them with quality, repetition, and progress signals.
 
 ### B. Cost signals
 Treat these as efficiency warnings:
@@ -365,6 +375,30 @@ Use this skill with a conservative operating posture.
 - Classify provider/server/tool failures as `external_error` first, then upgrade to a compound assessment only when repetition, verbosity growth, slowdown, or recovery confusion also appears.
 - Prefer summarize/continue or summarize/restart over destructive cleanup.
 - Consider periodic checks only after enough real-world usage establishes what counts as a useful signal vs a false positive.
+
+### Cross-session monitoring guidance
+Apply the same health logic across **all session types**, not only Discord:
+- direct chats
+- group/channel sessions
+- thread-bound sessions
+- ACP or subagent sessions when their history is available
+
+Do not assume the problem is platform-specific. A Telegram direct session, Discord channel session, or long-lived subagent can all become `early_warning` or `bloated`.
+
+### Lightweight proactive checks
+When asked to be proactive, use a lightweight pass instead of deep inspection:
+- inspect active or recently updated sessions first
+- flag sessions above threshold even if the user has not complained yet
+- prefer `summarize_and_continue` at 70-92% when quality is still acceptable
+- prefer `summarize_and_restart` above 92% when repetition, context drag, or loss of proportionality is visible
+- if one session is unhealthy but another related session is healthy, explicitly recommend the healthy session as the continuation target
+
+### Repetition escalation rule
+Escalate faster when both are true:
+- context usage is high
+- recent outputs are materially repetitive or add little new progress
+
+In that case, do not keep recommending indefinite continuation. Prefer a concrete restart/handoff recommendation.
 
 ## Example user requests
 
