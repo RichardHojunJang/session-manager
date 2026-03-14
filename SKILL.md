@@ -263,6 +263,16 @@ When a session is superseded:
 - do not recommend continuing active work there unless necessary
 - preserve it for lookup, not execution
 
+When a large unhealthy session keeps getting reused by the runtime:
+- prefer **archive + backup + store reset** over trying to rescue it in place
+- archive the transcript/session file first
+- back up the session metadata and the session store mapping
+- remove the active store entry only after backup succeeds
+- let the next incoming message create a fresh session
+
+This is a preserve-then-reset flow, not destructive deletion.
+The goal is to keep history while breaking the unhealthy active attachment.
+
 ---
 
 ## Compound-state rule
@@ -343,6 +353,7 @@ Use this skill with a conservative operating posture.
 - Default to **manual, symptom-based invocation** rather than always-on monitoring.
 - Do **not** run a full session-health check before every normal message.
 - Prefer summarize/continue or summarize/restart over destructive cleanup.
+- If a session is extremely bloated and still intercepts new work, prefer a preserve-then-reset recommendation: archive transcript, back up metadata/store, then remove the active store entry.
 - Escalate faster when both are true:
   - context usage is high
   - recent outputs are materially repetitive or add little new progress
